@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — Dream Lands Attendance</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-light:#E8C96A;--gold-dim:rgba(201,168,76,0.12);
+  --dark:#0D0D0D;--dark2:#161616;--dark3:#1E1E1E;--dark4:#242424;
+  --text:#F0EDE8;--text-muted:#9A9080;
+  --border:rgba(201,168,76,0.22);--border-soft:rgba(255,255,255,0.06);
+  --success:#4CAF82;--danger:#E05C5C;--warning:#E8A44A;--info:#5C9BE0;
+}
+body{font-family:'Hind Siliguri',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 50% at 15% 10%,rgba(201,168,76,0.06) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 70% at 85% 85%,rgba(201,168,76,0.04) 0%,transparent 60%),
+    repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(201,168,76,0.012) 40px,rgba(201,168,76,0.012) 41px);}
+
+/* ── LOGIN ── */
+.login-wrap{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.login-card{background:var(--dark2);border:1px solid var(--border);border-radius:24px;padding:44px;width:100%;max-width:400px;text-align:center;box-shadow:0 40px 80px rgba(0,0,0,.5);animation:fadeUp .6s ease both;}
+.login-icon{font-size:50px;margin-bottom:16px;}
+.login-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:var(--gold);margin-bottom:6px;}
+.login-sub{font-size:13px;color:var(--text-muted);margin-bottom:28px;}
+.pass-wrap{position:relative;margin-bottom:16px;}
+.pass-input{width:100%;background:var(--dark3);border:2px solid rgba(255,255,255,.07);border-radius:12px;padding:14px 16px;font-family:'Hind Siliguri',sans-serif;font-size:16px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;text-align:center;}
+.pass-input:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(201,168,76,.1);}
+.pass-input.err{border-color:var(--danger);}
+.login-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border:none;border-radius:12px;font-family:'Hind Siliguri',sans-serif;font-size:16px;font-weight:700;color:var(--dark);cursor:pointer;transition:all .25s;}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,168,76,.35);}
+.login-err{font-size:13px;color:var(--danger);margin-bottom:12px;display:none;}
+.back-link{display:block;margin-top:16px;font-size:13px;color:var(--text-muted);text-decoration:none;transition:color .2s;}
+.back-link:hover{color:var(--gold);}
+
+/* ── DASHBOARD ── */
+#dashboard{display:none;}
+.nav{position:sticky;top:0;z-index:100;background:rgba(13,13,13,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 24px;}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--gold);}
+.nav-logo small{color:var(--text-muted);font-size:12px;font-family:'Hind Siliguri',sans-serif;font-weight:400;}
+.nav-actions{display:flex;gap:10px;align-items:center;}
+.btn-sm{padding:8px 16px;border-radius:8px;font-family:'Hind Siliguri',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--gold);transition:all .2s;}
+.btn-sm:hover{background:var(--gold-dim);}
+.btn-sm.danger{color:var(--danger);border-color:rgba(224,92,92,.25);}
+.btn-sm.danger:hover{background:rgba(224,92,92,.1);}
+
+.main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:28px 20px 60px;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--dark2);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:transform .2s;}
+.stat-card:hover{transform:translateY(-2px);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,var(--gold),var(--gold-light));}
+.stat-icon{font-size:26px;margin-bottom:8px;}
+.stat-val{font-size:30px;font-weight:700;color:var(--gold);line-height:1;margin-bottom:4px;}
+.stat-lbl{font-size:12px;color:var(--text-muted);}
+
+/* CARD */
+.card{background:var(--dark2);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.card-title2{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.card-title2::before{content:'';width:3px;height:18px;background:linear-gradient(to bottom,var(--gold),var(--gold-light));border-radius:2px;}
+
+/* TABS */
+.tabs{display:flex;gap:6px;margin-bottom:20px;background:var(--dark2);border:1px solid var(--border);border-radius:12px;padding:6px;}
+.tab-btn{flex:1;padding:10px;border:none;background:transparent;border-radius:8px;font-family:'Hind Siliguri',sans-serif;font-size:14px;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all .2s;}
+.tab-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--dark);}
+
+/* LIVE badge */
+.live-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(76,175,130,0.1);border:1px solid rgba(76,175,130,0.3);border-radius:100px;padding:4px 12px;font-size:12px;color:var(--success);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--success);animation:pulse 1.5s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:rgba(201,168,76,.07);border-bottom:1px solid var(--border);}
+thead th{padding:12px 14px;text-align:left;font-size:12px;font-weight:700;color:var(--gold);white-space:nowrap;text-transform:uppercase;letter-spacing:.06em;}
+tbody tr{border-bottom:1px solid var(--border-soft);transition:background .15s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(255,255,255,.025);}
+td{padding:12px 14px;font-size:14px;vertical-align:middle;}
+.badge-in{display:inline-flex;align-items:center;gap:5px;background:rgba(76,175,130,.1);border:1px solid rgba(76,175,130,.25);border-radius:6px;padding:3px 10px;font-size:12px;color:var(--success);}
+.badge-out{display:inline-flex;align-items:center;gap:5px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:6px;padding:3px 10px;font-size:12px;color:var(--gold);}
+.badge-team{display:inline-block;background:var(--dark4);border:1px solid var(--border-soft);border-radius:6px;padding:2px 9px;font-size:11px;color:var(--text-muted);}
+.emp-avatar{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--border);font-size:13px;font-weight:700;color:var(--gold);margin-right:8px;vertical-align:middle;}
+
+/* FILTERS */
+.filter-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.filter-select, .filter-input{
+  background:var(--dark3);border:1px solid var(--border);border-radius:8px;
+  padding:8px 12px;font-family:'Hind Siliguri',sans-serif;font-size:14px;
+  color:var(--text);outline:none;transition:border-color .2s;
+}
+.filter-select:focus,.filter-input:focus{border-color:var(--gold);}
+
+/* REPORT SUMMARY */
+.rpt-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:48px 20px;color:var(--text-muted);}
+.empty-state .ei{font-size:40px;margin-bottom:12px;}
+
+/* LOADING */
+.loading-row td{text-align:center;color:var(--text-muted);padding:32px!important;}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid rgba(201,168,76,.3);border-top-color:var(--gold);border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:8px;}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* REFRESH */
+.refresh-info{font-size:12px;color:var(--text-muted);margin-top:6px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){.rpt-summary{grid-template-columns:1fr 1fr}.tabs{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+
+<!-- ══ LOGIN ══ -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="login-icon">🔐</div>
+    <div class="login-title">Admin Access</div>
+    <div class="login-sub">Dream Lands Attendance Dashboard</div>
+    <div class="login-err" id="loginErr">❌ পাসওয়ার্ড ভুল হয়েছে</div>
+    <div class="pass-wrap">
+      <input class="pass-input" id="passInput" type="password" placeholder="পাসওয়ার্ড দিন"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">🔓 Login করুন</button>
+    <a href="index.html" class="back-link">← Attendance Portal এ ফিরে যান</a>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div id="dashboard">
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        🏢 Dream Lands <small>Admin Dashboard</small>
+      </div>
+      <div class="nav-actions">
+        <span class="live-badge"><span class="live-dot"></span>Live — Sheet</span>
+        <button class="btn-sm" onclick="refreshAll()">🔄 Refresh</button>
+        <button class="btn-sm" onclick="exportCSV()">⬇ CSV</button>
+        <button class="btn-sm danger" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main">
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-val" id="statTotal">—</div>
+        <div class="stat-lbl">মোট কর্মী</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🟢</div>
+        <div class="stat-val" id="statIn">—</div>
+        <div class="stat-lbl">আজ Check-In</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🌙</div>
+        <div class="stat-val" id="statOut">—</div>
+        <div class="stat-lbl">আজ Check-Out</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-val" id="statPending">—</div>
+        <div class="stat-lbl">এখনো নেই</div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tb-today"     onclick="switchTab('today')">📅 আজকের উপস্থিতি</button>
+      <button class="tab-btn"        id="tb-report"    onclick="switchTab('report')">📊 মাসিক রিপোর্ট</button>
+      <button class="tab-btn"        id="tb-employees" onclick="switchTab('employees')">👤 কর্মী তালিকা</button>
+    </div>
+
+    <!-- ── TODAY ── -->
+    <div id="sec-today">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title2">আজকের উপস্থিতি</span>
+          <div>
+            <span id="todayDateLabel" style="font-size:13px;color:var(--text-muted);"></span>
+            <div class="refresh-info" id="lastRefreshTime"></div>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>#</th><th>নাম</th><th>পদবী</th><th>টিম</th><th>Check-In</th><th>Check-Out</th><th>Duration</th>
+            </tr></thead>
+            <tbody id="todayBody">
+              <tr class="loading-row"><td colspan="7"><span class="spin"></span>Sheet থেকে লোড হচ্ছে...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="todayEmpty" style="display:none;">
+          <div class="ei">📭</div>
+          <div>আজ কোনো attendance রেকর্ড নেই</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MONTHLY REPORT ── -->
+    <div id="sec-report" style="display:none;">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title2">মাসিক রিপোর্ট</span>
+          <div class="filter-row">
+            <input class="filter-input" type="month" id="rptMonth" onchange="renderReport()">
+            <select class="filter-select" id="rptTeam" onchange="renderReport()">
+              <option value="">— সব টিম —</option>
+              <option value="Top Management">Top Management</option>
+              <option value="Marketing">Marketing</option>
+            </select>
+            <select class="filter-select" id="rptEmp" onchange="renderReport()"></select>
+          </div>
+        </div>
+        <div class="rpt-summary" id="rptSummary"></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>তারিখ</th><th>নাম</th><th>পদবী</th><th>টিম</th><th>Check-In</th><th>Check-Out</th><th>Duration</th>
+            </tr></thead>
+            <tbody id="rptBody">
+              <tr class="loading-row"><td colspan="7"><span class="spin"></span>লোড হচ্ছে...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="rptEmpty" style="display:none;">
+          <div class="ei">📭</div>
+          <div>এই মাসে কোনো রেকর্ড নেই</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EMPLOYEES ── -->
+    <div id="sec-employees" style="display:none;">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title2">কর্মী তালিকা</span>
+          <span style="font-size:13px;color:var(--text-muted);">মোট: <strong id="empCount" style="color:var(--gold);">—</strong> জন</span>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>#</th><th>ID</th><th>নাম</th><th>পদবী</th><th>টিম</th><th>Full Code</th>
+            </tr></thead>
+            <tbody id="empBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/employees.js"></script>
+<script src="js/attendance.js"></script>
+<script>
+
+// ══ LOGIN ══════════════════════════════════════════════════
+function doLogin() {
+  const pass = document.getElementById('passInput').value;
+  const err  = document.getElementById('loginErr');
+  if (pass === CONFIG.admin.password) {
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    initDashboard();
+  } else {
+    err.style.display = 'block';
+    const inp = document.getElementById('passInput');
+    inp.classList.add('err');
+    setTimeout(() => { inp.classList.remove('err'); err.style.display='none'; }, 2000);
+  }
+}
+function doLogout() {
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('passInput').value = '';
+}
+document.getElementById('passInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ══ INIT ═══════════════════════════════════════════════════
+function initDashboard() {
+  // Date label
+  const now = new Date();
+  document.getElementById('todayDateLabel').textContent = formatDateBn(now);
+
+  // Month filter default
+  const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  document.getElementById('rptMonth').value = ym;
+
+  // Employee dropdown
+  buildEmpDropdown();
+
+  // Load today's data
+  renderToday();
+  updateStats();
+}
+
+// ══ STATS ══════════════════════════════════════════════════
+async function updateStats() {
+  const total = Object.keys(EMPLOYEES).length;
+  document.getElementById('statTotal').textContent = total;
+
+  const rows = await getTodayFromSheet();
+  const checkedIn  = rows.filter(r => r.checkIn).length;
+  const checkedOut = rows.filter(r => r.checkOut).length;
+  const pending    = total - checkedIn;
+
+  document.getElementById('statIn').textContent      = checkedIn;
+  document.getElementById('statOut').textContent     = checkedOut;
+  document.getElementById('statPending').textContent = pending;
+}
+
+// ══ TODAY TABLE ════════════════════════════════════════════
+async function renderToday() {
+  const body  = document.getElementById('todayBody');
+  const empty = document.getElementById('todayEmpty');
+
+  body.innerHTML = '<tr class="loading-row"><td colspan="7"><span class="spin"></span>Google Sheet থেকে লোড হচ্ছে...</td></tr>';
+  empty.style.display = 'none';
+
+  const rows = await getTodayFromSheet();
+
+  // Update refresh time
+  document.getElementById('lastRefreshTime').textContent =
+    'শেষ আপডেট: ' + new Date().toLocaleTimeString('bn-BD', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+
+  if (!rows.length) {
+    body.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  body.innerHTML = rows.map((r, i) => `
+    <tr>
+      <td style="color:var(--text-muted);font-size:12px;">${i+1}</td>
+      <td><span class="emp-avatar">${(r.name||'?')[0]}</span><strong>${r.name}</strong></td>
+      <td style="font-size:13px;">${r.designation}</td>
+      <td><span class="badge-team">${r.team}</span></td>
+      <td>${r.checkIn  ? `<span class="badge-in">🟢 ${r.checkIn}</span>`   : '<span style="color:var(--text-muted);font-size:12px;">—</span>'}</td>
+      <td>${r.checkOut ? `<span class="badge-out">🌙 ${r.checkOut}</span>` : '<span style="color:var(--text-muted);font-size:12px;">—</span>'}</td>
+      <td style="font-size:12px;color:var(--text-muted);">${r.duration || '—'}</td>
+    </tr>
+  `).join('');
+}
+
+// ══ MONTHLY REPORT ═════════════════════════════════════════
+async function renderReport() {
+  const month = document.getElementById('rptMonth').value;
+  const team  = document.getElementById('rptTeam').value;
+  const empId = document.getElementById('rptEmp').value;
+
+  const body  = document.getElementById('rptBody');
+  const empty = document.getElementById('rptEmpty');
+  const sumEl = document.getElementById('rptSummary');
+
+  body.innerHTML = '<tr class="loading-row"><td colspan="7"><span class="spin"></span>Sheet থেকে লোড হচ্ছে...</td></tr>';
+  empty.style.display = 'none';
+  sumEl.innerHTML = '';
+
+  // ✅ Sheet থেকে data আনো
+  let rows = await getMonthlyFromSheet(month);
+
+  // Filter
+  rows = rows.filter(r => {
+    if (team  && r.team  !== team)              return false;
+    if (empId && String(r.empId) !== String(empId)) return false;
+    return true;
+  });
+
+  const totalDays = rows.length;
+  const withIn    = rows.filter(r => r.checkIn).length;
+  const withBoth  = rows.filter(r => r.checkIn && r.checkOut).length;
+
+  sumEl.innerHTML = `
+    <div style="background:var(--dark3);border:1px solid var(--border-soft);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:22px;font-weight:700;color:var(--info);">${totalDays}</div>
+      <div style="font-size:11px;color:var(--text-muted);">মোট রেকর্ড</div>
+    </div>
+    <div style="background:var(--dark3);border:1px solid var(--border-soft);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:22px;font-weight:700;color:var(--success);">${withIn}</div>
+      <div style="font-size:11px;color:var(--text-muted);">Check-In</div>
+    </div>
+    <div style="background:var(--dark3);border:1px solid var(--border-soft);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:22px;font-weight:700;color:var(--gold);">${withBoth}</div>
+      <div style="font-size:11px;color:var(--text-muted);">সম্পূর্ণ</div>
+    </div>
+  `;
+
+  if (!rows.length) {
+    body.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  body.innerHTML = rows.map(r => `
+    <tr>
+      <td style="font-size:13px;color:var(--text-muted);">${r.date}</td>
+      <td style="font-weight:600;">${r.name}</td>
+      <td style="font-size:13px;">${r.designation}</td>
+      <td><span class="badge-team">${r.team}</span></td>
+      <td>${r.checkIn  ? `<span class="badge-in">🟢 ${r.checkIn}</span>`   : '<span style="color:var(--text-muted);font-size:12px;">—</span>'}</td>
+      <td>${r.checkOut ? `<span class="badge-out">🌙 ${r.checkOut}</span>` : '<span style="color:var(--text-muted);font-size:12px;">—</span>'}</td>
+      <td style="font-size:12px;color:var(--text-muted);">${r.duration || '—'}</td>
+    </tr>
+  `).join('');
+}
+
+// ══ EMPLOYEES ══════════════════════════════════════════════
+function renderEmployees() {
+  const body = document.getElementById('empBody');
+  const emps = Object.values(EMPLOYEES);
+  document.getElementById('empCount').textContent = emps.length;
+  body.innerHTML = emps.map((e, i) => `
+    <tr>
+      <td style="color:var(--text-muted);font-size:12px;">${i+1}</td>
+      <td style="font-weight:700;color:var(--gold);font-size:16px;">${e.id}</td>
+      <td><span class="emp-avatar">${e.name[0]}</span>${e.name}</td>
+      <td style="font-size:13px;">${e.designation}</td>
+      <td><span class="badge-team">${e.team}</span></td>
+      <td style="font-family:monospace;color:var(--text-muted);font-size:13px;">${e.fullCode}</td>
+    </tr>
+  `).join('');
+}
+
+function buildEmpDropdown() {
+  const sel = document.getElementById('rptEmp');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— সবাই —</option>';
+  Object.values(EMPLOYEES).forEach(e => {
+    const o = document.createElement('option');
+    o.value = e.id; o.textContent = e.name;
+    sel.appendChild(o);
+  });
+}
+
+// ══ TABS ═══════════════════════════════════════════════════
+function switchTab(tab) {
+  ['today','report','employees'].forEach(t => {
+    document.getElementById('sec-'+t).style.display = t===tab ? 'block' : 'none';
+    document.getElementById('tb-'+t).classList.toggle('active', t===tab);
+  });
+  if (tab === 'employees') renderEmployees();
+  if (tab === 'report')    renderReport();
+  if (tab === 'today')     renderToday();
+}
+
+// ══ REFRESH ALL ═══════════════════════════════════════════
+async function refreshAll() {
+  await renderToday();
+  await updateStats();
+}
+
+// ══ EXPORT CSV ════════════════════════════════════════════
+async function exportCSV() {
+  const month = document.getElementById('rptMonth')?.value || '';
+  let rows;
+  if (month) {
+    rows = await getMonthlyFromSheet(month);
+  } else {
+    rows = await getTodayFromSheet();
+  }
+
+  if (!rows.length) { alert('কোনো ডেটা নেই'); return; }
+
+  const header = ['Date','Emp ID','Name','Designation','Team','Check-In','Check-Out','Duration'];
+  const csv = [header, ...rows.map(r => [
+    r.date||'', r.empId||'', r.name||'', r.designation||'', r.team||'',
+    r.checkIn||'', r.checkOut||'', r.duration||''
+  ])].map(r => r.join(',')).join('\n');
+
+  const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `DreamLands_${month||'today'}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ══ AUTO REFRESH (প্রতি ৬০ সেকেন্ডে) ═════════════════════
+setInterval(() => {
+  if (document.getElementById('dashboard').style.display !== 'none') {
+    const activeTab = document.querySelector('.tab-btn.active')?.id?.replace('tb-','');
+    if (activeTab === 'today') {
+      renderToday();
+      updateStats();
+    }
+  }
+}, 60000);
+
+</script>
+</body>
+</html>
