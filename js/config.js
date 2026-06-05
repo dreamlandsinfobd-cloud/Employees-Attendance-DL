@@ -14,7 +14,7 @@ const CONFIG = {
 
   // ── 2. GOOGLE SHEET (Apps Script Web App URL) ────────────
   //  Setup গাইড: README.md দেখুন
-  sheetUrl: "https://script.google.com/macros/s/AKfycbyBaeBsHuSreY888nCc3l5DFH8Su1KefxeAQAmkdZtCbNKLvi_mfnK1JCNvFYAAIOw0/exec",
+  sheetUrl: "https://docs.google.com/spreadsheets/d/12zs5LHoYM-sjyX3BGl-PYDpq5RcskcfVIsCfczMZdzw/edit?gid=0#gid=0",
   //  ↑ এই URL আপনার নিজের Apps Script Deploy URL দিয়ে বদলান
 
   // ── 3. OFFICE IP RESTRICTION ─────────────────────────────
